@@ -9,7 +9,7 @@ Course Selection & Schedule System**:
   * Supports NCU's complete 13-period (1~9, Z, A, B, C) weekly timetable.
   * Features a fully interactive layout—tapping on any empty period triggers the "AI Course Search" bottom sheet.
 * **Stateful Navigation**: Utilizes an IndexedStack combined with multiple independent Navigators. This ensures that users will not lose their scroll progress or page state when switching between Home, News, Portal, and Settings tabs.
-
+```
 ## 📁 Project Structure
 
 open-ncu-prototype/
@@ -43,7 +43,7 @@ open-ncu-prototype/
 ├── pubspec.yaml             # Flutter dependencies & project settings
 ├── pubspec.lock             # Dependency version lockfile
 └── README.md                # Project documentation
-
+```
 🌲 神奇松果 (OpenTPI Frontend Prototype)
 
 這是一個使用 Flutter 開發的中大校務與 AI 選課輔助 App 前端雛形。目前的專案主要完成了首頁的流暢滾動介面、選課課表的完整排版，以及支援狀態保留的底層 Tab 導覽架構。
@@ -56,7 +56,7 @@ open-ncu-prototype/
 多重導覽狀態保留 (Stateful Navigation)：底層透過 IndexedStack 結合多個獨立 Navigator，確保使用者在切換首頁、訊息、校務系統、設定時，各頁面的瀏覽進度與狀態不會丟失。
 
 📁 專案架構 
-
+```
 open-ncu-prototype/
 ├── android/                 # Android 平台專屬設定與原生代碼
 ├── ios/                     # iOS 平台專屬設定與原生代碼
@@ -88,3 +88,4 @@ open-ncu-prototype/
 ├── pubspec.yaml             # Flutter 套件依賴管理與專案設定 (如 assets, fonts)
 ├── pubspec.lock             # 套件依賴的具體版本鎖定檔
 └── README.md                # 專案說明文件
+```
