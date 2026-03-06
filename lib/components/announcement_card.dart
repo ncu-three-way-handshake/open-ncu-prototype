@@ -21,7 +21,7 @@ class AnnouncementCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap ?? () {},
@@ -34,10 +34,7 @@ class AnnouncementCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // Category label using the standalone Label component
-                  Label(
-                    text: label,
-                    color: colorScheme.primary,
-                  ),
+                  Label(text: label, color: colorScheme.primary),
                   // Date row with event icon
                   Row(
                     children: [
@@ -76,3 +73,4 @@ class AnnouncementCard extends StatelessWidget {
     );
   }
 }
+

@@ -8,7 +8,7 @@ class CourseCard extends StatelessWidget {
     required this.courseName,
     required this.courseTime,
     required this.courseLocation,
-    this.category = 'Required',
+    this.category = '必修',
     this.onTap,
   });
 
@@ -38,15 +38,20 @@ class CourseCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       courseName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  // Display category label 
+                  // Display category label
                   Label(
                     text: category,
-                    color: category == 'Required' ? Colors.redAccent : Colors.blueAccent,
+                    color: category == '必修'
+                        ? Colors.redAccent
+                        : Colors.blueAccent,
                   ),
                 ],
               ),
@@ -61,7 +66,11 @@ class CourseCard extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  Icon(Icons.location_on_outlined, size: 14, color: colorScheme.primary),
+                  Icon(
+                    Icons.location_on_outlined,
+                    size: 14,
+                    color: colorScheme.primary,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -83,3 +92,4 @@ class CourseCard extends StatelessWidget {
     );
   }
 }
+
