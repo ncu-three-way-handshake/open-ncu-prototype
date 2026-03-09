@@ -6,8 +6,8 @@ import 'package:prototype/pages/portal.dart';
 import 'package:prototype/pages/setting.dart';
 import 'package:prototype/theme.dart';
 
-
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 
@@ -46,38 +46,38 @@ class _MainAppState extends State<MainApp> {
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeNotifier,
       builder: (context, themeMode, _) => MaterialApp(
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: themeMode,
-      // Pop within the current tab first; if already at root, allow system back.
-      home: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) async {
-          if (didPop) return;
-          final navState = _tabKeys[_currentIndex].currentState;
-          if (navState != null && navState.canPop()) {
-            navState.pop();
-          }
-        },
-        child: Scaffold(
-          body: IndexedStack(
-            index: _currentIndex,
-            children: List.generate(5, (i) => _buildTabNavigator(i)),
-          ),
-          bottomNavigationBar: NavigationBar(
-            onDestinationSelected: (int index) {
-              if (index == _currentIndex) {
-                // Tapping the active tab pops to its root.
-                _tabKeys[index].currentState?.popUntil((r) => r.isFirst);
-              } else {
-                setState(() => _currentIndex = index);
-              }
-            },
-            selectedIndex: _currentIndex,
-            destinations: _destinations,
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: themeMode,
+        // Pop within the current tab first; if already at root, allow system back.
+        home: PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            final navState = _tabKeys[_currentIndex].currentState;
+            if (navState != null && navState.canPop()) {
+              navState.pop();
+            }
+          },
+          child: Scaffold(
+            body: IndexedStack(
+              index: _currentIndex,
+              children: List.generate(5, (i) => _buildTabNavigator(i)),
+            ),
+            bottomNavigationBar: NavigationBar(
+              onDestinationSelected: (int index) {
+                if (index == _currentIndex) {
+                  // Tapping the active tab pops to its root.
+                  _tabKeys[index].currentState?.popUntil((r) => r.isFirst);
+                } else {
+                  setState(() => _currentIndex = index);
+                }
+              },
+              selectedIndex: _currentIndex,
+              destinations: _destinations,
+            ),
           ),
         ),
-      ),
       ),
     );
   }

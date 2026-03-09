@@ -21,7 +21,7 @@ class AnnouncementCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap ?? () {},
