@@ -22,18 +22,22 @@ class ShortcutCircular extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ElevatedButton(
-          onPressed: onPressed ?? () {}, // provide a default empty callback to avoid null issues
-          style: ElevatedButton.styleFrom(
-            shape: const CircleBorder(),
-            padding: const EdgeInsets.all(16),
-            // maintain the same color but adjust opacity based on the theme mode
-            backgroundColor: color.withValues(alpha: isDark ? 0.24 : 0.12),
-            foregroundColor: color,
-            elevation: 0,
-            minimumSize: const Size.fromRadius(32),
+        Material(
+          color: color.withValues(alpha: isDark ? 0.24 : 0.12),
+          shape: const CircleBorder(),
+          child: InkWell(
+            onTap: onPressed ?? () {},
+            customBorder: const CircleBorder(),
+            splashColor: color.withValues(alpha: 0.3),
+            highlightColor: color.withValues(alpha: 0.15),
+            child: SizedBox(
+              width: 64,
+              height: 64,
+              child: Center(
+                child: Icon(icon, size: 28.0, color: color),
+              ),
+            ),
           ),
-          child: Icon(icon, size: 28.0, color: color),
         ),
         const SizedBox(height: 4),
         Text(

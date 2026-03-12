@@ -5,7 +5,6 @@ import 'package:prototype/components/course_card.dart';
 import 'package:prototype/components/quick_button.dart';
 import 'package:prototype/components/shortcut.dart';
 import 'package:prototype/pages/course.dart';
-import 'package:prototype/pages/curriculum.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
