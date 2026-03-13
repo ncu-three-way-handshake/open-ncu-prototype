@@ -1,41 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:prototype/pages/portal_shortcuts_page.dart';
+import 'package:prototype/pages/portal_web_view.dart';
 
-class PortalPage extends StatefulWidget {
+class PortalPage extends StatelessWidget {
   const PortalPage({super.key});
 
   @override
-  State<PortalPage> createState() => _PortalPageState();
-}
-
-class _PortalPageState extends State<PortalPage> {
-  InAppWebViewController? webViewController;
-  CookieManager cookieManager = CookieManager.instance();
-  PullToRefreshController pullToRefreshController = PullToRefreshController();
-
-  @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context) {
+    return PortalShortcutsPage(
+      shortcuts: defaultPortalShortcuts,
+      onShortcutTap: (item) => _openShortcut(context, item),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('校務系統', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
-      body: InAppWebView(
-        initialUrlRequest: URLRequest(
-          url: WebUri.uri(Uri(scheme: 'https', host: 'portal.ncu.edu.tw')),
-        ),
-        initialSettings: InAppWebViewSettings(
-          javaScriptEnabled: true,
-          useOnDownloadStart: true,
-        ),
-        onWebViewCreated: (controller) {
-          webViewController = controller;
-        },
-      ),
-    );
+  void _openShortcut(BuildContext context, PortalShortcutItem item) {
+    final destination = item.destination;
+
+    switch (destination) {
+      case PortalInternalShortcutDestination(:final pageBuilder):
+        Navigator.of(context).push(MaterialPageRoute(builder: pageBuilder));
+      case PortalWebShortcutDestination(
+        :final title,
+        :final url,
+        :final authEntryUrl,
+        :final sessionProbeHosts,
+      ):
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => PortalWebViewPage(
+              title: title,
+              targetUrl: url,
+              authEntryUrl: authEntryUrl,
+              sessionProbeHosts: sessionProbeHosts,
+            ),
+          ),
+        );
+    }
   }
 }
