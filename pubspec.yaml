@@ -12,6 +12,7 @@ dependencies:
   html: ^0.15.6
   http: ^1.6.0
   flutter_inappwebview: ^6.1.5
+  material_symbols_icons: ^4.2906.0
 
 dev_dependencies:
   flutter_test:
