@@ -40,15 +40,18 @@ class PortalAuthenticator {
     status.value = PortalSessionStatus.authenticating;
 
     final result = await completer.future;
+    final token = result?.trim();
 
     await _headless!.dispose();
 
-    if (result != null) {
+    if (token != null && token.isNotEmpty) {
+      portalToken.value = token;
       status.value = PortalSessionStatus.authenticated;
     } else {
+      portalToken.value = null;
       status.value = PortalSessionStatus.expired;
     }
 
-    return result;
+    return token;
   }
 }
