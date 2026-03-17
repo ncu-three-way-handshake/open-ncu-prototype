@@ -1,9 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:prototype/pages/portal_shortcuts_page.dart';
 import 'package:prototype/pages/portal_web_view.dart';
-import 'package:prototype/services/portal_session_manager.dart';
+import 'package:prototype/services/portal_authenticator.dart';
 import 'package:prototype/widgets/portal_session_indicator.dart';
 
 class PortalPage extends StatefulWidget {
@@ -16,20 +17,12 @@ class PortalPage extends StatefulWidget {
 class _PortalPageState extends State<PortalPage> {
   static const _portalAuthHost = 'portal.ncu.edu.tw';
 
-  final PortalSessionManager _sessionManager = PortalSessionManager(
-    authHosts: {_portalAuthHost},
-  );
+  final PortalAuthenticator _authenticator = PortalAuthenticator();
 
   @override
   void initState() {
     super.initState();
-    unawaited(_sessionManager.refreshSessionStatus());
-  }
-
-  @override
-  void dispose() {
-    _sessionManager.dispose();
-    super.dispose();
+    unawaited(_refreshPortalAuth());
   }
 
   @override
@@ -38,8 +31,8 @@ class _PortalPageState extends State<PortalPage> {
       sections: defaultPortalShortcutSections,
       appBarActions: [
         PortalSessionIndicator(
-          sessionManager: _sessionManager,
-          onRefresh: () => unawaited(_sessionManager.refreshSessionStatus()),
+          authenticator: _authenticator,
+          onRefresh: () => unawaited(_refreshPortalAuth()),
           onOpenLogin: () => unawaited(_openPortalLogin(context)),
         ),
       ],
@@ -47,22 +40,28 @@ class _PortalPageState extends State<PortalPage> {
     );
   }
 
+  Future<void> _refreshPortalAuth() async {
+    try {
+      await _authenticator.fetchPortalToken();
+    } catch (_) {
+      // Status is updated inside PortalAuthenticator.
+    }
+  }
+
   Future<void> _openPortalLogin(BuildContext context) {
-    return Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => PortalWebViewPage(
-          title: 'Portal 登入',
-          targetUrl: Uri(scheme: 'https', host: _portalAuthHost),
-          authEntryUrl: Uri(scheme: 'https', host: _portalAuthHost),
-          sessionProbeHosts: const {_portalAuthHost},
-          onSessionProbe: (_, currentUrl) {
-            return _sessionManager.refreshSessionStatus(
-              probeHosts: {currentUrl.host, _portalAuthHost},
-            );
-          },
-        ),
-      ),
-    );
+    return Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) => PortalWebViewPage(
+              title: 'Portal 登入',
+              targetUrl: Uri(scheme: 'https', host: _portalAuthHost),
+              authEntryUrl: Uri(scheme: 'https', host: _portalAuthHost),
+              sessionProbeHosts: const {_portalAuthHost},
+              onSessionProbe: _probeAuthStateFromWebView,
+            ),
+          ),
+        )
+        .then((_) => _refreshPortalAuth());
   }
 
   Future<void> _openShortcut(BuildContext context, PortalShortcutItem item) {
@@ -80,9 +79,9 @@ class _PortalPageState extends State<PortalPage> {
         :final sessionProbeHosts,
       ):
         if (targetUrl == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('此功能尚未設定連結')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('此功能尚未設定連結')));
           return Future.value();
         }
         return Navigator.of(context).push(
@@ -92,18 +91,18 @@ class _PortalPageState extends State<PortalPage> {
               targetUrl: targetUrl,
               authEntryUrl: authEntryUrl,
               sessionProbeHosts: sessionProbeHosts,
-              onSessionProbe: (_, currentUrl) {
-                return _sessionManager.refreshSessionStatus(
-                  probeHosts: {
-                    ...sessionProbeHosts,
-                    currentUrl.host,
-                    _portalAuthHost,
-                  },
-                );
-              },
+              onSessionProbe: _probeAuthStateFromWebView,
             ),
           ),
         );
     }
+  }
+
+  Future<void> _probeAuthStateFromWebView(
+    InAppWebViewController controller,
+    Uri currentUrl,
+  ) async {
+    if (currentUrl.host != _portalAuthHost) return;
+    await _authenticator.fetchPortalToken();
   }
 }

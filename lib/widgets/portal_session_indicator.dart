@@ -1,53 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:prototype/services/portal_session_manager.dart';
+import 'package:prototype/services/portal_authenticator.dart';
 
 enum _SessionAction { refresh, login }
 
 class PortalSessionIndicator extends StatelessWidget {
   const PortalSessionIndicator({
     super.key,
-    required this.sessionManager,
+    required this.authenticator,
     required this.onRefresh,
     required this.onOpenLogin,
   });
 
-  final PortalSessionManager sessionManager;
+  final PortalAuthenticator authenticator;
   final VoidCallback onRefresh;
   final VoidCallback onOpenLogin;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: sessionManager,
+      animation: Listenable.merge([
+        authenticator.status,
+        authenticator.portalToken,
+      ]),
       builder: (context, _) {
-        final status = sessionManager.status;
+        final status = authenticator.status.value;
         final colorScheme = Theme.of(context).colorScheme;
 
         final (icon, color, tooltip) = switch (status) {
           PortalSessionStatus.authenticated => (
             Icons.verified_user,
             colorScheme.primary,
-            'Portal 已登入'
+            'Portal 已登入',
           ),
-          PortalSessionStatus.checking => (
+          PortalSessionStatus.authenticating => (
             Icons.sync,
             colorScheme.secondary,
-            '檢查登入狀態中'
+            '驗證 Portal 中',
           ),
-          PortalSessionStatus.expired => (
+          PortalSessionStatus.requireReauthentication => (
             Icons.warning_amber_rounded,
             colorScheme.error,
-            'Portal 可能已登出'
+            'Portal 需要重新登入',
+          ),
+          PortalSessionStatus.expired => (
+            Icons.schedule,
+            colorScheme.error,
+            'Portal 已過期',
           ),
           PortalSessionStatus.error => (
             Icons.error_outline,
             colorScheme.error,
-            'Portal 狀態檢查失敗'
-          ),
-          PortalSessionStatus.unknown => (
-            Icons.help_outline,
-            colorScheme.onSurfaceVariant,
-            'Portal 狀態未知'
+            'Portal 驗證失敗',
           ),
         };
 
@@ -62,10 +65,7 @@ class PortalSessionIndicator extends StatelessWidget {
             }
           },
           itemBuilder: (context) => const [
-            PopupMenuItem(
-              value: _SessionAction.refresh,
-              child: Text('重新檢查登入狀態'),
-            ),
+            PopupMenuItem(value: _SessionAction.refresh, child: Text('重新驗證')),
             PopupMenuItem(
               value: _SessionAction.login,
               child: Text('前往 Portal 登入'),

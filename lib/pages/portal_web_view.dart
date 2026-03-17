@@ -1,12 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
-typedef SessionProbeCallback = Future<void> Function(
-  InAppWebViewController controller,
-  Uri currentUrl,
-);
+typedef SessionProbeCallback =
+    Future<void> Function(InAppWebViewController controller, Uri currentUrl);
 
 class PortalWebViewPage extends StatefulWidget {
   const PortalWebViewPage({
@@ -60,7 +59,9 @@ class _PortalWebViewPageState extends State<PortalWebViewPage> {
               initialUrlRequest: URLRequest(url: WebUri.uri(widget.targetUrl)),
               initialSettings: InAppWebViewSettings(
                 javaScriptEnabled: true,
+                domStorageEnabled: true,
                 useOnDownloadStart: true,
+                isInspectable: true,
               ),
               onWebViewCreated: (controller) {
                 _webViewController = controller;

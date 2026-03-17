@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prototype/components/shortcut.dart';
+import 'package:prototype/services/portal_authenticator.dart';
 
 const _portalHost = 'portal.ncu.edu.tw';
 
@@ -34,7 +35,11 @@ final List<PortalShortcutSection> defaultPortalShortcutSections = [
     title: '學務相關',
     items: [
       _portalSystemShortcut('學生證掛失', Icons.credit_card_off, '/system/32'),
-      _portalSystemShortcut('學籍系統', Icons.account_balance, '/system/incu-registrationflow'),
+      _portalSystemShortcut(
+        '學籍系統',
+        Icons.account_balance,
+        '/system/incu-registrationflow',
+      ),
       _portalSystemShortcut('畢業資格審查', Icons.school, '/system/incu-graduate-2'),
       _portalSystemShortcut('學費繳費證明', Icons.receipt_long, '/system/tuition'),
     ],
@@ -42,7 +47,11 @@ final List<PortalShortcutSection> defaultPortalShortcutSections = [
   PortalShortcutSection(
     title: '可利用資源',
     items: [
-      _portalSystemShortcut('個別諮商', Icons.volunteer_activism, '/system/consult'),
+      _portalSystemShortcut(
+        '個別諮商',
+        Icons.volunteer_activism,
+        '/system/consult',
+      ),
       _portalSystemShortcut(
         '圖書館服務平台',
         Icons.local_library,
@@ -55,7 +64,11 @@ final List<PortalShortcutSection> defaultPortalShortcutSections = [
     items: [
       _portalSystemShortcut('宿舍網路', Icons.router, '/system/dormnet'),
       _portalSystemShortcut('客服中心', Icons.headset_mic, '/system/sdsystem'),
-      _portalSystemShortcut('Office365', Icons.workspaces_outline, '/system/office365'),
+      _portalSystemShortcut(
+        'Office365',
+        Icons.workspaces_outline,
+        '/system/office365',
+      ),
       _portalSystemShortcut('G Suite', Icons.apps, '/system/gsuite'),
     ],
   ),
@@ -81,6 +94,12 @@ PortalShortcutItem _portalSystemShortcut(
   IconData icon,
   String path,
 ) {
+  final token = PortalAuthenticator().portalToken.value?.trim();
+  final queryParameters = <String, String>{};
+  if (token != null && token.isNotEmpty) {
+    queryParameters['token'] = token;
+  }
+
   return PortalShortcutItem(
     label: label,
     icon: icon,
@@ -90,6 +109,7 @@ PortalShortcutItem _portalSystemShortcut(
         scheme: 'https',
         host: _portalHost,
         path: path.startsWith('/') ? path.substring(1) : path,
+        queryParameters: queryParameters.isEmpty ? null : queryParameters,
       ),
       authEntryUrl: Uri(scheme: 'https', host: _portalHost),
       sessionProbeHosts: const {_portalHost},
