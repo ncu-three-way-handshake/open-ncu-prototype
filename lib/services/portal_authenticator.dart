@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 enum PortalSessionStatus {
@@ -20,10 +19,13 @@ class PortalAuthenticator {
 
   static final PortalAuthenticator _instance = PortalAuthenticator._internal();
   factory PortalAuthenticator() => _instance;
+  
   HeadlessInAppWebView? _headless;
   Future<String?>? _fetching;
+
   PortalAuthenticator._internal();
 
+  // Fetches the portal token, ensuring only one fetch operation is active at a time
   Future<String?> fetchPortalToken() async {
     if (_fetching != null) {
       return _fetching!;
@@ -34,13 +36,15 @@ class PortalAuthenticator {
 
   Future<String?> _fetchPortalTokenInternal() async {
     final completer = Completer<String?>();
+    
     _headless = HeadlessInAppWebView(
       initialUrlRequest: URLRequest(
         url: WebUri.uri(Uri.parse("https://portal.ncu.edu.tw")),
       ),
       initialSettings: InAppWebViewSettings(javaScriptEnabled: true),
       onLoadStop: (controller, url) async {
-        final token = await controller.evaluateJavascript(source: "token;");
+        // Assuming the portal sets a global JS variable `window.token` upon successful login
+        final token = await controller.evaluateJavascript(source: "window.token;");
         if (!completer.isCompleted) {
           completer.complete(token);
         }
@@ -48,13 +52,19 @@ class PortalAuthenticator {
     );
 
     try {
-      await _headless!.run();
       status.value = PortalSessionStatus.authenticating;
+      await _headless!.run();
 
-      final result = await completer.future;
+      // 30s timeout to prevent hanging indefinitely
+      final result = await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          debugPrint("Portal auth timed out");
+          return null;
+        },
+      );
+
       final token = result?.trim();
-
-      await _headless!.dispose();
 
       if (token != null && token.isNotEmpty) {
         portalToken.value = token;
@@ -67,10 +77,11 @@ class PortalAuthenticator {
       return token;
     } catch (e) {
       status.value = PortalSessionStatus.error;
-      debugPrint("Error occured during fetching portal token");
-      debugPrintStack();
-      return "";
+      debugPrint("Error occurred during fetching portal token: $e");
+      return null;
     } finally {
+      await _headless?.dispose();
+      _headless = null;
       _fetching = null;
     }
   }
