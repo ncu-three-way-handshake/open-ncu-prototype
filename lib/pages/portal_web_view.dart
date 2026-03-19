@@ -31,7 +31,28 @@ class PortalWebViewPage extends StatefulWidget {
 
 class _PortalWebViewPageState extends State<PortalWebViewPage> {
   InAppWebViewController? _webViewController;
+  PullToRefreshController? _pullToRefreshController; 
   int _progress = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pullToRefreshController = PullToRefreshController(
+      settings: PullToRefreshSettings(
+        color: Colors.blue,
+      ),
+      onRefresh: () async {
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          _webViewController?.reload();
+        } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+          _webViewController?.loadUrl(
+            urlRequest: URLRequest(url: await _webViewController?.getUrl()),
+          );
+        }
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +78,7 @@ class _PortalWebViewPageState extends State<PortalWebViewPage> {
           Expanded(
             child: InAppWebView(
               initialUrlRequest: URLRequest(url: WebUri.uri(widget.targetUrl)),
+              pullToRefreshController: _pullToRefreshController, 
               initialSettings: InAppWebViewSettings(
                 javaScriptEnabled: true,
                 domStorageEnabled: true,
@@ -70,12 +92,16 @@ class _PortalWebViewPageState extends State<PortalWebViewPage> {
                 _handlePageEvent(url);
               },
               onLoadStop: (controller, url) {
+                _pullToRefreshController?.endRefreshing(); 
                 _handlePageEvent(url);
               },
               onUpdateVisitedHistory: (controller, url, _) {
                 _handlePageEvent(url);
               },
               onProgressChanged: (controller, progress) {
+                if (progress == 100) {
+                  _pullToRefreshController?.endRefreshing(); 
+                }
                 if (!mounted) return;
                 setState(() => _progress = progress);
               },
