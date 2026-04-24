@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prototype/components/shortcut.dart';
+import 'package:prototype/components/portal/shortcut.dart';
 import 'package:prototype/services/portal_authenticator.dart';
 
 const _portalHost = 'portal.ncu.edu.tw';
@@ -130,7 +130,7 @@ PortalShortcutItem _blankWebShortcut(String label, IconData icon) {
   );
 }
 
-class PortalShortcutsPage extends StatelessWidget {
+class PortalShortcutsPage extends StatefulWidget {
   const PortalShortcutsPage({
     super.key,
     this.title = '校務系統',
@@ -145,23 +145,65 @@ class PortalShortcutsPage extends StatelessWidget {
   final List<Widget>? appBarActions;
 
   @override
+  State<PortalShortcutsPage> createState() => _PortalShortcutsPageState();
+}
+
+class _PortalShortcutsPageState extends State<PortalShortcutsPage> {
+  String _searchQuery = '';
+
+  @override
   Widget build(BuildContext context) {
+    final filteredSections = widget.sections
+        .map((section) {
+          final filteredItems = section.items
+              .where(
+                (item) => item.label.toLowerCase().contains(
+                  _searchQuery.toLowerCase(),
+                ),
+              )
+              .toList();
+          if (filteredItems.isEmpty) return null;
+          return PortalShortcutSection(
+            title: section.title,
+            items: filteredItems,
+          );
+        })
+        .whereType<PortalShortcutSection>()
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-        actions: appBarActions,
+        title: Text(
+          widget.title,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        actions: widget.appBarActions,
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         children: [
-          const SearchBar(hintText: '搜尋功能...', leading: Icon(Icons.search)),
+          SearchBar(
+            hintText: '搜尋功能...',
+            leading: const Icon(Icons.search),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
           const SizedBox(height: 16.0),
-          for (final section in sections) ...[
-            _PortalSectionTitle(title: section.title),
-            const SizedBox(height: 8.0),
-            _ShortcutGrid(items: section.items, onTap: onShortcutTap),
-            const SizedBox(height: 20.0),
-          ],
+          if (filteredSections.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 40.0),
+              child: Center(child: Text('找不到相關功能')),
+            )
+          else
+            for (final section in filteredSections) ...[
+              _PortalSectionTitle(title: section.title),
+              const SizedBox(height: 8.0),
+              _ShortcutGrid(items: section.items, onTap: widget.onShortcutTap),
+              const SizedBox(height: 20.0),
+            ],
         ],
       ),
     );

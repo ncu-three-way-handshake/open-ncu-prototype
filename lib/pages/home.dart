@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:prototype/components/home/section_header.dart';
-import 'package:prototype/components/course_card.dart';
-import 'package:prototype/components/quick_button.dart';
-import 'package:prototype/components/shortcut.dart';
+import 'package:prototype/components/home/course_card.dart';
+import 'package:prototype/components/home/quick_button.dart';
+import 'package:prototype/components/portal/shortcut.dart';
 import 'package:prototype/pages/course.dart';
 
 class HomePage extends StatelessWidget {
@@ -106,7 +106,7 @@ class HomePage extends StatelessWidget {
               const ShortcutCircular(
                 icon: Icons.library_books,
                 label: '圖書館',
-                color: Color(0xFFFFFF9800),
+                color: Color(0xFFFF9800),
               ),
             ]),
           ),
