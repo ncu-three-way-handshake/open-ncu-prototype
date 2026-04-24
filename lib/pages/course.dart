@@ -36,107 +36,120 @@ class _CourseSelectionPageState extends State<CourseSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final days = _visibleDays;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('課表', style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '週末',
-                style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
-              ),
-              Switch(
-                value: _showWeekends,
-                onChanged: (v) => setState(() => _showWeekends = v),
-              ),
-            ],
-          ),
-        ],
-      ),
+      appBar: _buildAppBar(context),
       body: Column(
         children: [
-          // Fixed week header
-          Row(
-            children: [
-              Spacer(flex: _periodColumnFlex),
-              ...days.map(
-                (day) => Expanded(
-                  flex: _dayCellFlex,
-                  child: SizedBox(
-                    height: 36,
-                    child: Center(
-                      child: Text(
-                        day,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          _buildHeader(days),
           const Divider(height: 1),
-          // Scrollable grid with period labels in sync
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: List.generate(_periods.length, (row) {
-                  final isEven = row.isEven;
-                  return Container(
-                    color: isEven
-                        ? colorScheme.surface
-                        : colorScheme.surfaceContainerHighest,
-                    height: _rowHeight,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: _periodColumnFlex,
-                          child: Center(
-                            child: Text(
-                              _periods[row],
-                              style: TextStyle(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ),
-                        ...List.generate(days.length, (col) {
-                          return Expanded(
-                            flex: _dayCellFlex,
-                            child: GestureDetector(
-                              onTap: () => _showSearchModal(
-                                context,
-                                day: col,
-                                periodIndex: row,
-                              ),
-                              child: Container(
-                                height: _rowHeight,
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    left: BorderSide(
-                                      color: colorScheme.outlineVariant
-                                          .withValues(alpha: 0.3),
-                                      width: 0.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  );
-                }),
+          Expanded(child: _buildTimetable(context, days)),
+        ],
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return AppBar(
+      title: const Text('課表', style: TextStyle(fontWeight: FontWeight.bold)),
+      actions: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '週末',
+              style: TextStyle(fontSize: 14, color: colorScheme.onSurface),
+            ),
+            Switch(
+              value: _showWeekends,
+              onChanged: (v) => setState(() => _showWeekends = v),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(List<String> days) {
+    return Row(
+      children: [
+        const Spacer(flex: _periodColumnFlex),
+        ...days.map(
+          (day) => Expanded(
+            flex: _dayCellFlex,
+            child: SizedBox(
+              height: 36,
+              child: Center(
+                child: Text(
+                  day,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimetable(BuildContext context, List<String> days) {
+    return SingleChildScrollView(
+      child: Column(
+        children: List.generate(
+          _periods.length,
+          (index) => _buildPeriodRow(context, index, days),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPeriodRow(BuildContext context, int index, List<String> days) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isEven = index.isEven;
+
+    return Container(
+      color: isEven ? colorScheme.surface : colorScheme.surfaceContainerHighest,
+      height: _rowHeight,
+      child: Row(
+        children: [
+          Expanded(
+            flex: _periodColumnFlex,
+            child: Center(
+              child: Text(
+                _periods[index],
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
+              ),
+            ),
+          ),
+          ...List.generate(
+            days.length,
+            (col) => _buildDayCell(context, col, index),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDayCell(BuildContext context, int col, int periodIndex) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Expanded(
+      flex: _dayCellFlex,
+      child: GestureDetector(
+        onTap: () =>
+            _showSearchModal(context, day: col, periodIndex: periodIndex),
+        child: Container(
+          height: _rowHeight,
+          decoration: BoxDecoration(
+            border: Border(
+              left: BorderSide(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+                width: 0.5,
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
