@@ -27,9 +27,8 @@ class _CourseSelectionPageState extends State<CourseSelectionPage> {
     'C',
   ];
   static const List<String> _weekDays = ['一', '二', '三', '四', '五', '六', '日'];
-  static const double _rowHeight = 50.0;
-  static const int _periodColumnFlex = 1;
-  static const int _dayCellFlex = 2;
+  static const double _headerHeight = 36.0;
+  static const double _periodWidth = 40.0;
 
   List<String> get _visibleDays =>
       _showWeekends ? _weekDays : _weekDays.sublist(0, 5);
@@ -40,12 +39,30 @@ class _CourseSelectionPageState extends State<CourseSelectionPage> {
 
     return Scaffold(
       appBar: _buildAppBar(context),
-      body: Column(
-        children: [
-          _buildHeader(days),
-          const Divider(height: 1),
-          Expanded(child: _buildTimetable(context, days)),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalWidth = constraints.maxWidth;
+          final totalHeight = constraints.maxHeight;
+
+          final dayWidth = (totalWidth - _periodWidth) / days.length;
+          // Calculate row height based on available height after header and divider
+          final rowHeight = (totalHeight - _headerHeight - 1) / _periods.length;
+
+          return Column(
+            children: [
+              _buildHeader(days, dayWidth),
+              const Divider(height: 1),
+              Expanded(
+                child: Stack(
+                  children: [
+                    _buildTimetable(context, days, dayWidth, rowHeight),
+                    ..._buildCourseCards(context, dayWidth, rowHeight),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -72,20 +89,18 @@ class _CourseSelectionPageState extends State<CourseSelectionPage> {
     );
   }
 
-  Widget _buildHeader(List<String> days) {
+  Widget _buildHeader(List<String> days, double dayWidth) {
     return Row(
       children: [
-        const Spacer(flex: _periodColumnFlex),
+        const SizedBox(width: _periodWidth),
         ...days.map(
-          (day) => Expanded(
-            flex: _dayCellFlex,
-            child: SizedBox(
-              height: 36,
-              child: Center(
-                child: Text(
-                  day,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
+          (day) => SizedBox(
+            width: dayWidth,
+            height: _headerHeight,
+            child: Center(
+              child: Text(
+                day,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -94,28 +109,75 @@ class _CourseSelectionPageState extends State<CourseSelectionPage> {
     );
   }
 
-  Widget _buildTimetable(BuildContext context, List<String> days) {
-    return SingleChildScrollView(
-      child: Column(
-        children: List.generate(
-          _periods.length,
-          (index) => _buildPeriodRow(context, index, days),
-        ),
+  Widget _buildTimetable(
+    BuildContext context,
+    List<String> days,
+    double dayWidth,
+    double rowHeight,
+  ) {
+    return Column(
+      children: List.generate(
+        _periods.length,
+        (index) => _buildPeriodRow(context, index, days, dayWidth, rowHeight),
       ),
     );
   }
 
-  Widget _buildPeriodRow(BuildContext context, int index, List<String> days) {
+  List<Widget> _buildCourseCards(
+    BuildContext context,
+    double dayWidth,
+    double rowHeight,
+  ) {
+    // Mock course for demonstration
+    final mockCourses = [
+      (name: '計算機概論', dayIndex: 0, startPeriod: 1, length: 3),
+      (name: '微積分 I', dayIndex: 2, startPeriod: 5, length: 2),
+      (name: '物理實驗', dayIndex: 4, startPeriod: 9, length: 3),
+    ];
+
+    return mockCourses.map((course) {
+      return Positioned(
+        top: course.startPeriod * rowHeight,
+        left: _periodWidth + (course.dayIndex * dayWidth),
+        width: dayWidth,
+        height: course.length * rowHeight,
+        child: Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: Colors.blue.withValues(alpha: 0.5)),
+            ),
+            padding: const EdgeInsets.all(4),
+            child: Text(
+              course.name,
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  Widget _buildPeriodRow(
+    BuildContext context,
+    int index,
+    List<String> days,
+    double dayWidth,
+    double rowHeight,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     final isEven = index.isEven;
 
     return Container(
       color: isEven ? colorScheme.surface : colorScheme.surfaceContainerHighest,
-      height: _rowHeight,
+      height: rowHeight,
       child: Row(
         children: [
-          Expanded(
-            flex: _periodColumnFlex,
+          SizedBox(
+            width: _periodWidth,
             child: Center(
               child: Text(
                 _periods[index],
@@ -125,28 +187,32 @@ class _CourseSelectionPageState extends State<CourseSelectionPage> {
           ),
           ...List.generate(
             days.length,
-            (col) => _buildDayCell(context, col, index),
+            (col) => _buildDayCell(context, col, index, dayWidth, rowHeight),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDayCell(BuildContext context, int col, int periodIndex) {
+  Widget _buildDayCell(
+    BuildContext context,
+    int col,
+    int periodIndex,
+    double dayWidth,
+    double rowHeight,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Expanded(
-      flex: _dayCellFlex,
-      child: GestureDetector(
-        onTap: () =>
-            _showSearchModal(context, day: col, periodIndex: periodIndex),
-        child: Container(
-          height: _rowHeight,
-          decoration: BoxDecoration(
-            border: Border(
-              left: BorderSide(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.3),
-                width: 0.5,
-              ),
+    return GestureDetector(
+      onTap: () =>
+          _showSearchModal(context, day: col, periodIndex: periodIndex),
+      child: Container(
+        width: dayWidth,
+        height: rowHeight,
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: colorScheme.outlineVariant.withValues(alpha: 0.3),
+              width: 0.5,
             ),
           ),
         ),
