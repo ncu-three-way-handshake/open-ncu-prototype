@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prototype/components/label.dart'; // Import Label component
+import 'package:prototype/components/common/label.dart'; // Import Label component
 
 /// Card for displaying campus announcements.
 class AnnouncementCard extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prototype/components/label.dart';
+import 'package:prototype/components/common/label.dart';
 
 // Card component for displaying course info
 class CourseCard extends StatelessWidget {

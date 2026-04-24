@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prototype/components/announcement_card.dart';
+import 'package:prototype/components/news/announcement_card.dart';
 import 'package:prototype/models/scholarship_item.dart';
 import 'package:prototype/services/scholarship_service.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:prototype/components/shortcut.dart';
+import 'package:prototype/components/portal/shortcut.dart';
 import 'package:prototype/services/portal_authenticator.dart';
 
 const _portalHost = 'portal.ncu.edu.tw';
