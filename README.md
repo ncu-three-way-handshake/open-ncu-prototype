@@ -38,5 +38,10 @@ A Flutter-based frontend prototype for the NCU campus service and course selecti
 
 ---
 
-# Acknowledgement
+## Acknowledgement
 **Course Finder Fetcher**: [NCU-Course-Finder-DataFetcher-v2](https://github.com/zetaraku/NCU-Course-Finder-DataFetcher-v2)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
