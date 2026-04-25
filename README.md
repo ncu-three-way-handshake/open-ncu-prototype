@@ -1,11 +1,17 @@
 # Magic Pinecone / Open-NCU Frontend Prototype
 
+<p align="center">
+  <img src="docs/assets/screenshot_home.png" width="300" />
+  <img src="docs/assets/screenshot_timetable.png" width="300" />
+</p>
+
 A Flutter-based frontend prototype for the NCU campus service and course selection application.
 
 ## Features
 
 - **Portal Integration**: Includes a WebView component for accessing campus portal services directly within the app.
 - **Theme Support**: Includes light and dark mode configurations.
+- **Session Management**: A semi-auto portal session management to facilitate the portal workflow without storing Basic Auth credentials.
 
 ## Getting Started
 
